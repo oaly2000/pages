@@ -7,6 +7,10 @@ export const handler = define.handlers({
     const title = ctx.params.title!;
     const record = loadSingleRecord(title);
 
+    if (!record) {
+      return new Response(null, { status: 404 });
+    }
+
     addHeads(ctx, [
       <title>{record.title}</title>,
     ]);
@@ -21,7 +25,7 @@ export default define.page<typeof handler>(function ({ data }) {
       <div className="card-body">
         <h2 class="card-title text-2xl border-b-[1px] border-accent text-accent py-2 items-baseline justify-between">
           <a href={`/contents/${data.title}`}>{data.title}</a>
-          <span class="text-sm">{data.date}</span>
+          <span class="text-sm">{data.date.toLocaleDateString()}</span>
         </h2>
         <div class="markdown-body pt-2 !bg-[unset] !text-[color:unset]" dangerouslySetInnerHTML={{ __html: data.compiled }} />
       </div>

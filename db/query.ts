@@ -6,7 +6,7 @@ type Attrs = { title: string; tags?: string[]; date: string; "disable-math"?: bo
 
 const files = walk("contents", { exts: [".md"] });
 
-const records = await Promise.all(
+const records = (await Promise.all(
   await Array.fromAsync(files).then((files) => {
     return files.map(async (file) => {
       const tags = file.path.split("/").slice(1, -1);
@@ -25,7 +25,7 @@ const records = await Promise.all(
       return record;
     });
   }),
-);
+)).sort((a, b) => b.date.getTime() - a.date.getTime());
 
 const tagKeyedRecords = new Map();
 
