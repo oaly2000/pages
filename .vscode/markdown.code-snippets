@@ -1,0 +1,16 @@
+{
+	"front-matter": {
+		"scope": "markdown",
+		"prefix": "fm",
+		"body": [
+			"---",
+			"title: ${1:$TM_FILENAME}",
+			"date: $CURRENT_YEAR-$CURRENT_MONTH-$CURRENT_DATE",
+			"tags: ",
+			"  - ${2:unknown}",
+			"disable-math: ${3:false}",
+			"---",
+		],
+		"description": "Front matter"
+	}
+}
