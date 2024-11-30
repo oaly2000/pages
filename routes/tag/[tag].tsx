@@ -1,9 +1,9 @@
 import { define } from "../../utils.ts";
-import { loadTitleTagsByTag } from "../../db/query.ts";
+import { loadRecordsByTag } from "../../db/query.ts";
 
 export default define.page(function ({ params }) {
   const tag = params.tag!;
-  const records = loadTitleTagsByTag(tag);
+  const records = loadRecordsByTag(tag);
 
   return (
     <div className="flex flex-col gap-5">

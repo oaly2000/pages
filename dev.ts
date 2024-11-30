@@ -4,9 +4,6 @@ import { tailwind } from "@fresh/plugin-tailwind";
 import { Builder } from "fresh/dev";
 import { app } from "./main.ts";
 
-await Deno.remove("db/db.sqlite");
-await import("./prepare-contents.ts");
-
 const builder = new Builder();
 tailwind(builder, app, {});
 if (Deno.args.includes("build")) {

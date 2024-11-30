@@ -1,37 +1,53 @@
-import { Database } from "@db/sqlite";
+import { walk } from "@std/fs";
+import { extractYaml } from "@std/front-matter";
+import { render } from "@deno/gfm";
 
-const db = new Database("db/db.sqlite");
+type Attrs = { title: string; tags?: string[]; date: string; "disable-math"?: boolean };
 
-type TitleTags = {
-  title: string;
-  tags: string[];
+const files = walk("contents", { exts: [".md"] });
+
+const records = await Promise.all(
+  await Array.fromAsync(files).then((files) => {
+    return files.map(async (file) => {
+      const tags = file.path.split("/").slice(1, -1);
+      const { attrs, body } = extractYaml(await Deno.readTextFile(file.path)) as { attrs: Attrs; body: string };
+
+      if (attrs.tags) tags.push(...attrs.tags);
+
+      const record = {
+        title: attrs.title,
+        path: file.path,
+        tags,
+        date: new Date(attrs.date),
+        compiled: render(body, { allowMath: !attrs["disable-math"] }),
+      };
+
+      return record;
+    });
+  }),
+);
+
+const tagKeyedRecords = new Map();
+
+for (const record of records) {
+  for (const tag of record.tags) {
+    if (!tagKeyedRecords.has(tag)) tagKeyedRecords.set(tag, []);
+    tagKeyedRecords.get(tag)!.push(record);
+  }
+}
+
+const db = {
+  titleKeyed: new Map(records.map((record) => [record.title, record])),
+  tagKeyed: tagKeyedRecords,
+  noKeyed: records,
 };
 
-export const loadRecords = (page = 1, perPage = 10) =>
-  db.sql<
-    { title: string; tags: string; date: string; compiled: string }
-  >`SELECT title, tags, date, compiled FROM records ORDER BY date DESC LIMIT ${perPage} OFFSET ${(page - 1) * perPage}`.map((row) => ({
-    title: row.title,
-    tags: JSON.parse(row.tags),
-    date: new Date(row.date).toLocaleDateString(),
-    compiled: row.compiled,
-  }));
+export const loadRecords = (page = 1, perPage = 10) => db.noKeyed.slice((page - 1) * perPage, page * perPage);
 
-export const countTitleTags = () => db.sql<{ count: number }>`SELECT COUNT(*) as count FROM records`.map((row) => row.count)[0];
+export const count = () => db.noKeyed.length;
 
-export const loadTitleTagsByTag = (tag: string) =>
-  db.sql<{ title: string; tags: string }>`SELECT title, tags FROM records rs LEFT JOIN tags ts ON rs.path = ts.path WHERE ts.tag = ${tag}`
-    .map((row) => ({ title: row.title, tags: JSON.parse(row.tags) }) as TitleTags);
+export const loadSingleRecord = (title: string) => db.titleKeyed.get(title);
 
-export const loadSingleRecord = (title: string) =>
-  db.sql<
-    { title: string; tags: string; date: string; compiled: string }
-  >`SELECT title, tags, date, compiled FROM records WHERE title = ${title}`
-    .map((row) => ({
-      title: row.title,
-      tags: JSON.parse(row.tags),
-      date: new Date(row.date).toLocaleDateString(),
-      compiled: row.compiled,
-    }))[0];
+export const loadRecordsByTag = (tag: string): ReturnType<typeof loadRecords> => db.tagKeyed.get(tag);
 
-export const loadTags = () => db.sql<{ tag: string }>`SELECT DISTINCT tag FROM tags`.map((row) => row.tag);
+export const loadTags = () => Array.from(db.tagKeyed.keys());

@@ -1,5 +1,5 @@
 import { Partial } from "fresh/runtime";
-import { countTitleTags, loadRecords } from "../db/query.ts";
+import { count, loadRecords } from "../db/query.ts";
 import { define } from "../utils.ts";
 import { default as Content } from "./contents/[title].tsx";
 
@@ -9,7 +9,7 @@ export default define.page(function Home({ req }) {
   const perPage = query.get("perPage") ? Number(query.get("perPage")) : 2;
   const isFreshPartial = query.get("fresh-partial");
   const contents = isFreshPartial ? loadRecords(page, perPage) : loadRecords(1, page * perPage);
-  const hasNextPage = countTitleTags() > page * perPage;
+  const hasNextPage = count() > page * perPage;
 
   return (
     <div>
