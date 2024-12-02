@@ -1,12 +1,23 @@
 import { walk } from "@std/fs";
 import { extractYaml } from "@std/front-matter";
 import { render } from "@deno/gfm";
+import { crypto } from "jsr:@std/crypto";
+import "npm:prismjs@1.29.0/components/prism-typescript.js";
+import "npm:prismjs@1.29.0/components/prism-csharp.js";
+import "npm:prismjs@1.29.0/components/prism-fsharp.js";
+import "npm:prismjs@1.29.0/components/prism-powershell.js";
 
 type Attrs = { title: string; tags?: string[]; date: string; "disable-math"?: boolean };
 
+const md5 = async (s: string): Promise<string> => {
+  const buf = new TextEncoder().encode(s);
+  const buf_1 = await crypto.subtle.digest("MD5", buf);
+  return Array.from(new Uint8Array(buf_1)).map((b) => b.toString(16).padStart(2, "0")).join("");
+};
+
 const files = walk("contents", { exts: [".md"] });
 
-const records = (await Promise.all(
+export const records = (await Promise.all(
   await Array.fromAsync(files).then((files) => {
     return files.map(async (file) => {
       const tags = file.path.split("/").slice(1, -1);
@@ -20,34 +31,10 @@ const records = (await Promise.all(
         tags,
         date: new Date(attrs.date),
         compiled: render(body, { allowMath: !attrs["disable-math"] }),
+        md5: await md5(body),
       };
 
       return record;
     });
   }),
 )).sort((a, b) => b.date.getTime() - a.date.getTime());
-
-const tagKeyedRecords = new Map();
-
-for (const record of records) {
-  for (const tag of record.tags) {
-    if (!tagKeyedRecords.has(tag)) tagKeyedRecords.set(tag, []);
-    tagKeyedRecords.get(tag)!.push(record);
-  }
-}
-
-const db = {
-  titleKeyed: new Map(records.map((record) => [record.title, record])),
-  tagKeyed: tagKeyedRecords,
-  noKeyed: records,
-};
-
-export const loadRecords = (page = 1, perPage = 10) => db.noKeyed.slice((page - 1) * perPage, page * perPage);
-
-export const count = () => db.noKeyed.length;
-
-export const loadSingleRecord = (title: string) => db.titleKeyed.get(title);
-
-export const loadRecordsByTag = (tag: string): ReturnType<typeof loadRecords> => db.tagKeyed.get(tag);
-
-export const loadTags = () => Array.from(db.tagKeyed.keys());

@@ -1,8 +1,7 @@
-import { define } from "../../utils.ts";
-import { loadTags } from "../../db/query.ts";
+import { loadTags } from "../../neon/query.ts";
 
-export default define.page(function () {
-  const tags = loadTags();
+export default async function () {
+  const tags = await loadTags();
 
   return (
     <div className="flex flex-col gap-5">
@@ -13,4 +12,4 @@ export default define.page(function () {
       </nav>
     </div>
   );
-});
+}

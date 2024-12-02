@@ -1,15 +1,15 @@
 import { Partial } from "fresh/runtime";
-import { count, loadRecords } from "../db/query.ts";
-import { define } from "../utils.ts";
+import { count, loadRecords } from "../neon/query.ts";
 import { default as Content } from "./contents/[title].tsx";
+import { FreshContext } from "fresh";
 
-export default define.page(function Home({ req }) {
+export default async function Home({ req }: FreshContext) {
   const query = new URL(req.url).searchParams;
   const page = query.get("page") ? Number(query.get("page")) : 1;
   const perPage = query.get("perPage") ? Number(query.get("perPage")) : 2;
   const isFreshPartial = query.get("fresh-partial");
-  const contents = isFreshPartial ? loadRecords(page, perPage) : loadRecords(1, page * perPage);
-  const hasNextPage = count() > page * perPage;
+  const contents = await (isFreshPartial ? loadRecords(page, perPage) : loadRecords(1, page * perPage));
+  const hasNextPage = await count() > page * perPage;
 
   return (
     <div>
@@ -37,4 +37,4 @@ export default define.page(function Home({ req }) {
       </section>
     </div>
   );
-});
+}

@@ -1,11 +1,11 @@
 import { addHeads, define } from "../../utils.ts";
-import { loadSingleRecord } from "../../db/query.ts";
+import { loadSingleRecord } from "../../neon/query.ts";
 import { page } from "fresh";
 
 export const handler = define.handlers({
-  GET(ctx) {
+  async GET(ctx) {
     const title = ctx.params.title!;
-    const record = loadSingleRecord(title);
+    const record = await loadSingleRecord(title);
 
     if (!record) {
       return new Response(null, { status: 404 });
