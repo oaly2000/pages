@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS contents (
 await sql(`
 CREATE TABLE IF NOT EXISTS tag_contents (
     id SERIAL PRIMARY KEY,
-    content_id INTEGER NOT NULL REFERENCES contents (id),
+    content_id INTEGER NOT NULL REFERENCES contents (id) ON DELETE CASCADE,
     tag TEXT NOT NULL
 );`);
 

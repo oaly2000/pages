@@ -20,9 +20,9 @@ export const loadSingleRecord = async (title: string) => {
 };
 
 export const loadRecordsByTag = async (tag: string) => {
-  return (await sql("SELECT title FROM contents WHERE $1 = ANY(tags);", [tag])).map(({ title }) => title) as string[];
+  return (await sql("SELECT title FROM contents WHERE $1 = ANY(tags);", [tag])).map(({ title }: { title: string }) => title) as string[];
 };
 
 export const loadTags = async () => {
-  return (await sql("SELECT DISTINCT tag FROM tag_contents;")).map(({ tag }) => tag) as string[];
+  return (await sql("SELECT DISTINCT tag FROM tag_contents;")).map(({ tag }: { tag: string }) => tag) as string[];
 };

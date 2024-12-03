@@ -20,7 +20,7 @@ export default function Layout({ Component }: PageProps) {
         </div>
       </main>
       <footer>
-        <div className="h-16 flex items-center justify-center gap-5">
+        <div className="flex items-center justify-center gap-x-5 gap-y-2 max-md:flex-col max-md:pb-5">
           <a href="https://github.com/OALY2000">© OALY2000</a>
           <p className="flex gap-2 items-center">
             <span>Powered by Fresh</span>

@@ -7,15 +7,11 @@ export const ThemeControllerInput = () => {
   if (IS_BROWSER) {
     let theme: string = globalThis.matchMedia?.("(prefers-color-scheme: dark)").matches ? "synthwave" : "retro";
 
-    console.log(1, theme);
-
     document.cookie.split(";").forEach((cookie) => {
       const [name, value] = cookie.split("=");
       if (name.trim() === "theme") theme = value;
     });
     themeSignal.value = theme;
-
-    console.log(2, theme);
   }
 
   useSignalEffect(() => {

@@ -15,7 +15,7 @@ export default async function Home({ req }: FreshContext) {
     <div>
       <section>
         <h2 class="border-b-2 border-t-2 py-3 font-bold text-2xl text-center">虽然没什么鸟用但还是写了的小作文</h2>
-        <div f-client-nav class="px-4 py-10">
+        <div f-client-nav class="min-sm:px-4 py-10">
           <div f-client-nav={false} class="flex flex-col gap-10">
             <Partial name="contents" mode="append">
               {contents.map((content) => (
