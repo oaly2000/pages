@@ -4,7 +4,7 @@ import { page } from "fresh";
 
 export const handler = define.handlers({
   async GET(ctx) {
-    const title = ctx.params.title!;
+    const title = decodeURIComponent(ctx.params.title!);
     const record = await loadSingleRecord(title);
 
     if (!record) {
